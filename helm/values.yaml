@@ -1,0 +1,8 @@
+global:
+  slot:
+    blue:
+      enabled: true
+      tag: v1
+    green:
+      enabled: false
+      tag: v2

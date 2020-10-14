@@ -1,0 +1,8 @@
+apiVersion: v2
+name: nginx
+description: Green Blue (Zero Downtime) version deployment cycle in Kubernetes for web application
+version: 0.0.1
+
+dependencies:
+  - name: app
+    version: 0.0.1

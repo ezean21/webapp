@@ -1,0 +1,157 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-blue
+data:
+  default.conf: |
+    upstream app_wsgiapp {
+      server app-blue.default.svc.cluster.local:5000 fail_timeout=0;
+    }
+
+    server {
+        listen       80;
+        listen       [::]:80;
+        server_name  _;
+
+        access_log  /var/log/nginx/access.log;
+        error_log   /var/log/nginx/error.log;
+
+        location / {
+            proxy_pass           http://app_wsgiapp;
+            proxy_buffering      off;
+
+            proxy_set_header     Host             $host;
+            proxy_set_header     X-Real-IP        $remote_addr;
+            proxy_set_header     X-Forwarded-For  $proxy_add_x_forwarded_for;
+
+            proxy_http_version   1.1;
+            proxy_set_header     Upgrade      $http_upgrade;
+            proxy_set_header     Connection   "Upgrade";
+        }
+
+        location /version {
+            root     /usr/share/nginx/html;
+            index    version.html;
+        }
+
+        location /healthcheck {
+            proxy_pass   http://app_wsgiapp/healthcheck;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   /usr/share/nginx/html;
+        }
+    }
+  version.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <title>Running Version</title>
+        <style>
+            body {
+                color: #ffffff;
+                background-color: blue;
+                font-family: Arial, sans-serif;
+                font-size: 14px;
+            }
+
+            h1 {
+                font-size: 500%;
+                font-weight: normal;
+                margin-bottom: 0;
+            }
+
+            h2 {
+                font-size: 200%;
+                font-weight: normal;
+                margin-bottom: 0;
+            }
+        </style>
+    </head>
+    <body>
+    <div align="center">
+        <h1>Current deployed and running version is: {{ .Values.global.slot.green.tag }} </h1>
+    </div>
+    </body>
+    </html>
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-green
+data:
+  default.conf: |
+    upstream app_wsgiapp {
+      server app-green.default.svc.cluster.local:5000 fail_timeout=0;
+    }
+
+    server {
+        listen       80;
+        listen       [::]:80;
+        server_name  _;
+
+        access_log  /var/log/nginx/access.log;
+        error_log   /var/log/nginx/error.log;
+
+        location / {
+            proxy_pass           http://app_wsgiapp;
+            proxy_buffering      off;
+
+            proxy_set_header     Host             $host;
+            proxy_set_header     X-Real-IP        $remote_addr;
+            proxy_set_header     X-Forwarded-For  $proxy_add_x_forwarded_for;
+
+            proxy_http_version   1.1;
+            proxy_set_header     Upgrade      $http_upgrade;
+            proxy_set_header     Connection   "Upgrade";
+        }
+
+        location /version {
+            root     /usr/share/nginx/html;
+            index    version.html;
+        }
+
+        location /healthcheck {
+            proxy_pass   http://app_wsgiapp/healthcheck;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   /usr/share/nginx/html;
+        }
+    }
+  version.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <title>Running Version</title>
+        <style>
+            body {
+                color: #ffffff;
+                background-color: green;
+                font-family: Arial, sans-serif;
+                font-size: 14px;
+            }
+
+            h1 {
+                font-size: 500%;
+                font-weight: normal;
+                margin-bottom: 0;
+            }
+
+            h2 {
+                font-size: 200%;
+                font-weight: normal;
+                margin-bottom: 0;
+            }
+        </style>
+    </head>
+    <body>
+    <div align="center">
+        <h1>Current deployed and running version is: {{ .Values.global.slot.green.tag }} </h1>
+    </div>
+    </body>
+    </html>

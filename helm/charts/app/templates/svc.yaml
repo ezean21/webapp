@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-blue
+  labels:
+    app: app
+    slot: blue
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5000
+      protocol: TCP
+      targetPort: 5000
+  selector:
+    app: app
+    slot: blue
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-green
+  labels:
+    app: app
+    slot: green
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5000
+      protocol: TCP
+      targetPort: 5000
+  selector:
+    app: app
+    slot: green

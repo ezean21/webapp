@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-blue
+spec:
+  selector:
+    matchLabels:
+      app: app
+      slot: blue
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: app
+        slot: blue
+    spec:
+      containers:
+        - name: app
+          image: app:{{ .Values.global.slot.blue.tag }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-green
+spec:
+  selector:
+    matchLabels:
+      app: app
+      slot: green
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: app
+        slot: green
+    spec:
+      containers:
+        - name: app
+          image: app:{{ .Values.global.slot.green.tag }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000

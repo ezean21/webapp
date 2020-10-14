@@ -1,0 +1,132 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-blue
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx
+        slot: blue
+    spec:
+      terminationGracePeriodSeconds: 3600
+      containers:
+        - name: nginx
+          image: nginx:{{ .Values.global.slot.blue.tag }}
+          env:
+            - name: SLOT
+              value: "blue"
+            - name: TAG
+              value: {{ .Values.global.slot.green.tag }}
+          imagePullPolicy: IfNotPresent
+          readinessProbe:
+            httpGet:
+              path: /healthcheck
+              port: 80
+            initialDelaySeconds: 5
+            failureThreshold: 5
+            periodSeconds: 2
+          livenessProbe:
+            httpGet:
+              path: /healthcheck
+              port: 80
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 1
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/usr/sbin/nginx", "-s", "quit"]
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - mountPath: /etc/nginx/conf.d
+              readOnly: true
+              name: default-conf
+            - mountPath: /usr/share/nginx/html/version
+              readOnly: true
+              name: version-html
+      volumes:
+        - name: default-conf
+          configMap:
+            name: nginx-blue
+            items:
+              - key: default.conf
+                path: default.conf
+        - name: version-html
+          configMap:
+            name: nginx-blue
+            items:
+              - key: version.html
+                path: version.html
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-green
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx
+        slot: green
+    spec:
+      terminationGracePeriodSeconds: 3600
+      containers:
+        - name: nginx
+          image: nginx:{{ .Values.global.slot.green.tag }}
+          env:
+            - name: SLOT
+              value: "green"
+            - name: TAG
+              value: {{ .Values.global.slot.green.tag }}
+          imagePullPolicy: IfNotPresent
+          readinessProbe:
+            httpGet:
+              path: /healthcheck
+              port: 80
+            initialDelaySeconds: 5
+            failureThreshold: 5
+            periodSeconds: 2
+          livenessProbe:
+            httpGet:
+              path: /healthcheck
+              port: 80
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 1
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/usr/sbin/nginx", "-s", "quit"]
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - mountPath: /etc/nginx/conf.d
+              readOnly: true
+              name: default-conf
+            - mountPath: /usr/share/nginx/html/version
+              readOnly: true
+              name: version-html
+      volumes:
+        - name: default-conf
+          configMap:
+            name: nginx-green
+            items:
+              - key: default.conf
+                path: default.conf
+        - name: version-html
+          configMap:
+            name: nginx-green
+            items:
+              - key: version.html
+                path: version.html

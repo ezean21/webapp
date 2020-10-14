@@ -1,0 +1,27 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: nginx
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - nginx-gateway
+  http:
+    - route:
+        - destination:
+            host: nginx
+            subset: blue
+          {{- if and (eq .Values.global.slot.blue.enabled true) (eq .Values.global.slot.green.enabled false) }}
+          weight: 100
+          {{- else if and (eq .Values.global.slot.blue.enabled false) (eq .Values.global.slot.green.enabled true) }}
+          weight: 0
+          {{- end }}
+        - destination:
+            host: nginx
+            subset: green
+          {{- if and (eq .Values.global.slot.blue.enabled true) (eq .Values.global.slot.green.enabled false) }}
+          weight: 0
+          {{- else if and (eq .Values.global.slot.blue.enabled false) (eq .Values.global.slot.green.enabled true) }}
+          weight: 100
+          {{- end }}
